@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tb-redis-configmap
+  namespace: thingsboard
+data:
+    CACHE_TYPE: "redis"
+    REDIS_HOST: "redis"
+    REDIS_PORT: "6379"

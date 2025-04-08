@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: tb-mqtt-transport-conf
+  name: tb-mqtt-transport-configmap
   namespace: thingsboard
 data:
   logback.xml: |

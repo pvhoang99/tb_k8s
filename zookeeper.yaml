@@ -22,6 +22,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: zookeeper
+  namespace: thingsboard
 spec:
   replicas: 1
   selector:
@@ -47,8 +48,6 @@ spec:
               value: "5"
             - name: ZOO_SYNC_LIMIT
               value: "2"
-            #QUEUE
-            - name: TB_QUEUE_TYPE
-              value: "kafka"
-            - name: TB_KAFKA_SERVERS
-              value: "kafka:9092"
+          envFrom:
+            - configMapRef:
+                name: tb-kafka-configmap

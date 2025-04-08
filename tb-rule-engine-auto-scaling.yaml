@@ -1,15 +1,14 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: tb-core-hpa
-  namespace: thingsboard
+  name: tb-rule-hpa
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
     name: tb-rule-engine  # Tên Deployment bạn muốn auto-scale
-  minReplicas: 2
-  maxReplicas: 5
+  minReplicas: 1
+  maxReplicas: 2
   metrics:
     - type: Resource
       resource:

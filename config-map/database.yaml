@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tb-database-configmap
+  namespace: thingsboard
+data:
+  DATABASE_TS_TYPE: "cassandra"
+  CASSANDRA_URL: "172.18.0.1:9042"
+  SPRING_DRIVER_CLASS_NAME: "org.postgresql.Driver"
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://172.18.0.1:5432/thingsboard"
+  SPRING_DATASOURCE_USERNAME: "postgres"
+  SPRING_DATASOURCE_PASSWORD: "postgres"

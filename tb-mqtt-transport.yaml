@@ -43,18 +43,14 @@ spec:
           resources:
             requests:
               cpu: "2"
-              memory: "1Gi"
+              memory: "3Gi"
             limits:
               cpu: "4"
-              memory: "2Gi"
+              memory: "4Gi"
           volumeMounts:
             - name: tb-mqtt-transport-volume
               mountPath: /config
           env:
-            - name: ZOOKEEPER_ENABLED
-              value: "true"
-            - name: ZOOKEEPER_URL
-              value: "zookeeper:2181"
             - name: MQTT_BIND_ADDRESS
               value: "0.0.0.0"
             - name: MQTT_BIND_PORT
@@ -71,22 +67,17 @@ spec:
               value: "servlet"
             - name: HTTP_BIND_PORT
               value: "8081"
-            #QUEUE
-            - name: TB_QUEUE_TYPE
-              value: "kafka"
-            - name: TB_KAFKA_SERVERS
-              value: "kafka:9092"
-            - name: CACHE_TYPE
-              value: "redis"
-            #CACHE
-            - name: REDIS_HOST
-              value: "redis"
-            - name: REDIS_PORT
-              value: "6379"
+          envFrom:
+            - configMapRef:
+                name: tb-redis-configmap
+            - configMapRef:
+                name: tb-kafka-configmap
+            - configMapRef:
+                name: tb-zookeeper-configmap
       volumes:
         - name: tb-mqtt-transport-volume
           configMap:
-            name: tb-mqtt-transport-conf
+            name: tb-mqtt-transport-configmap
             items:
               - key: "logback.xml"
                 path: "logback.xml"

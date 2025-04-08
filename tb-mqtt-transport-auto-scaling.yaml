@@ -1,13 +1,13 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: tb-core-hpa
+  name: tb-mqtt-transport-hpa
   namespace: thingsboard
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: tb-core  # Tên Deployment bạn muốn auto-scale
+    name: tb-mqtt-transport  # Tên Deployment bạn muốn auto-scale
   minReplicas: 1
   maxReplicas: 2
   metrics:

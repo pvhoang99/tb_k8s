@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tb-zookeeper-configmap
+  namespace: thingsboard
+data:
+  ZOOKEEPER_ENABLED: "true"
+  ZOOKEEPER_URL: "zookeeper:2181"
