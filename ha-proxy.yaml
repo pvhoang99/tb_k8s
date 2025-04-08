@@ -1,0 +1,92 @@
+# =====================================================================
+# 1. Deployment cho HAProxy + Certbot
+# =====================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: haproxy-lb
+  namespace: thingsboard
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: haproxy-lb
+  template:
+    metadata:
+      labels:
+        app: haproxy-lb
+    spec:
+      containers:
+        - name: haproxy
+          image: thingsboard/haproxy-certbot:1.3.0
+          ports:
+            - containerPort: 80
+            - containerPort: 443
+            - containerPort: 1883
+            - containerPort: 7070
+            - containerPort: 9999
+
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+
+          # Biến môi trường
+          env:
+            - name: HTTP_PORT
+              value: "80"
+            - name: HTTPS_PORT
+              value: "443"
+            - name: MQTT_PORT
+              value: "1883"
+            - name: EDGES_RPC_PORT
+              value: "7070"
+            - name: FORCE_HTTPS_REDIRECT
+              value: "false"
+
+          # Mount volume để lấy config HAProxy và chứng chỉ
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+      # Khai báo volume (ở đây dùng hostPath cho ví dụ dev/test)
+      volumes:
+        - name: config-volume
+          hostPath:
+            path: /home/pham_hoang/Desktop/tb_k3s/haproxy/config
+            type: DirectoryOrCreate
+
+---
+# =====================================================================
+# 2. Service để expose các cổng bên ngoài
+# =====================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: haproxy-lb-service
+spec:
+  selector:
+    app: haproxy-lb
+  type: NodePort
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      nodePort: 30080  # Cổng bất kỳ 30000-32767
+    - name: https
+      port: 443
+      targetPort: 443
+      nodePort: 30443
+    - name: mqtt
+      port: 1883
+      targetPort: 1883
+      nodePort: 31883
+    - name: edges
+      port: 7070
+      targetPort: 7070
+      nodePort: 31070
+    - name: debug9999
+      port: 9999
+      targetPort: 9999
+      nodePort: 30999

@@ -1,0 +1,28 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: tb-js-executor-hpa
+  namespace: thingsboard
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: tb-js-executor  # Tên Deployment bạn muốn auto-scale
+  minReplicas: 10
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        # Theo dõi CPU usage
+        name: cpu
+        target:
+          # Chọn kiểu đo: Utilization = so sánh (usage / requests) * 100%
+          type: Utilization
+          averageUtilization: 80  # Nếu vượt quá 80% CPU request sẽ scale up
+    - type: Resource
+      resource:
+        # Theo dõi Memory usage
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 70  # Nếu vượt 70% memory request sẽ scale up

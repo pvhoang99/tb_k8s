@@ -1,0 +1,104 @@
+# =============================================
+# Service cho Kafka
+# =============================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: tb-rule-engine
+  namespace: thingsboard
+spec:
+  selector:
+    app: tb-rule-engine
+  ports:
+    - name: tb-rule-engine
+      port: 8080
+      targetPort: 8080
+
+---
+# =============================================
+# Deployment cho Rule-engine (docker.io/thingsboard/tb-rule-engine:3.6.0)
+# =============================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tb-rule-engine
+  namespace: thingsboard
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: tb-rule-engine
+  template:
+    metadata:
+      labels:
+        app: tb-rule-engine
+    spec:
+      containers:
+        - name: tb-rule-engine
+          image: docker.io/thingsboard/tb-node:3.6.0
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: "2"
+              memory: "2Gi"
+            limits:
+              cpu: "4"
+              memory: "4Gi"
+          volumeMounts:
+            - name: tb-conf-volume
+              mountPath: /config
+          env:
+            - name: TB_SERVICE_TYPE
+              value: "tb-rule-engine"
+            - name: EDGES_ENABLED
+              value: "true"
+            - name: ZOOKEEPER_ENABLED
+              value: "true"
+            - name: ZOOKEEPER_URL
+              value: "zookeeper:2181"
+            - name: JS_EVALUATOR
+              value: "remote"
+            - name: TRANSPORT_TYPE
+              value: "remote"
+            - name: HTTP_LOG_CONTROLLER_ERROR_STACK_TRACE
+              value: "false"
+            - name: METRICS_ENABLED
+              value: "true"
+            - name: METRICS_ENDPOINTS_EXPOSE
+              value: "prometheus"
+            #DATABASE
+            - name: DATABASE_TS_TYPE
+              value: "cassandra"
+            - name: CASSANDRA_URL
+              value: "172.18.0.1:9042"
+            - name: SPRING_DRIVER_CLASS_NAME
+              value: "org.postgresql.Driver"
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://172.18.0.1:5432/thingsboard"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "postgres"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "postgres"
+            #QUEUE
+            - name: TB_QUEUE_TYPE
+              value: "kafka"
+            - name: TB_KAFKA_SERVERS
+              value: "kafka:9092"
+            - name: CACHE_TYPE
+              value: "redis"
+            - name: REDIS_HOST
+              value: "redis"
+            - name: REDIS_PORT
+              value: "6379"
+      volumes:
+        - name: tb-conf-volume
+          configMap:
+            name: tb-core-conf
+            items:
+              - key: "logback.xml"
+                path: "logback.xml"
+              - key: "thingsboard.conf"
+                path: "thingsboard.conf"

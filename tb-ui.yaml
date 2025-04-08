@@ -1,0 +1,63 @@
+# =============================================
+# Service cho Kafka
+# =============================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: tb-ui
+  namespace: thingsboard
+spec:
+  selector:
+    app: tb-ui
+  ports:
+    - name: tb-ui
+      port: 8080
+      targetPort: 8080
+
+---
+# =============================================
+# Deployment cho Tb-core (docker.io/thingsboard/tb-node:3.6.0)
+# =============================================
+
+# =============================================
+# Deployment cho tb-core-executor (docker.io/thingsboard/tb-node:3.6.0)
+# =============================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tb-ui
+  namespace: thingsboard
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: tb-ui
+  template:
+    metadata:
+      labels:
+        app: tb-ui
+    spec:
+      containers:
+        - name: tb-ui
+          image: docker.io/thingsboard/tb-web-ui:3.6.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: HTTP_BIND_ADDRESS
+              value: "0.0.0.0"
+            - name: HTTP_BIND_PORT
+              value: "8080"
+            - name: TB_ENABLE_PROXY
+              value: "false"
+            - name: LOGGER_LEVEL
+              value: "info"
+            - name: LOG_FOLDER
+              value: "logs"
+            - name: LOGGER_FILENAME
+              value: "tb-web-ui-%DATE%.log"
+            - name: DOCKER_MODE
+              value: "true"
+
+

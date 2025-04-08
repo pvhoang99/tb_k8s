@@ -1,0 +1,69 @@
+# =============================================
+# Service cho Kafka
+# =============================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: tb-vc-executor
+  namespace: thingsboard
+spec:
+  selector:
+    app: tb-vc-executor
+  ports:
+    - name: tb-vc-executor
+      port: 8081
+      targetPort: 8081
+---
+# =============================================
+# Deployment cho Tb-vc-executor (docker.io/thingsboard/tb-vc-executor:3.6.0)
+# =============================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tb-vc-executor
+  namespace: thingsboard
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: tb-vc-executor
+  template:
+    metadata:
+      labels:
+        app: tb-vc-executor
+    spec:
+      containers:
+        - name: tb-vc-executor
+          image: docker.io/thingsboard/tb-vc-executor:3.6.0
+          ports:
+            - containerPort: 8081
+          volumeMounts:
+            - name: tb-vc-executor-volume
+              mountPath: /config
+          env:
+            - name: ZOOKEEPER_ENABLED
+              value: "true"
+            - name: ZOOKEEPER_URL
+              value: "zookeeper:2181"
+            #QUEUE
+            - name: TB_QUEUE_TYPE
+              value: "kafka"
+            - name: TB_KAFKA_SERVERS
+              value: "kafka:9092"
+            - name: CACHE_TYPE
+              value: "redis"
+            - name: REDIS_HOST
+              value: "redis"
+            - name: REDIS_PORT
+              value: "6379"
+      volumes:
+        - name: tb-vc-executor-volume
+          configMap:
+            name: tb-vc-executor-conf
+            items:
+              - key: "logback.xml"
+                path: "logback.xml"
+              - key: "tb-vc-executor.conf"
+                path: "tb-vc-executor.conf"

@@ -1,0 +1,54 @@
+# =============================================
+# Service cho Zookeeper
+# =============================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper
+  namespace: thingsboard
+spec:
+  selector:
+    app: zookeeper
+  ports:
+    - name: client
+      port: 2181
+      targetPort: 2181
+
+---
+# =============================================
+# Deployment cho Zookeeper
+# =============================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zookeeper
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zookeeper
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+    spec:
+      containers:
+        - name: zookeeper
+          # Image chính thức Zookeeper 3.8.0
+          image: zookeeper:3.8.0
+          ports:
+            - containerPort: 2181
+          env:
+            - name: ZOO_CLIENT_PORT
+              value: "2181"
+            - name: ZOO_MAX_CLIENT_CNXNS
+              value: "60"
+            - name: ZOO_INIT_LIMIT
+              value: "5"
+            - name: ZOO_SYNC_LIMIT
+              value: "2"
+            #QUEUE
+            - name: TB_QUEUE_TYPE
+              value: "kafka"
+            - name: TB_KAFKA_SERVERS
+              value: "kafka:9092"

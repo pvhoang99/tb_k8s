@@ -1,0 +1,94 @@
+# =============================================
+# Service cho Kafka
+# =============================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: tb-mqtt-transport
+  namespace: thingsboard
+spec:
+  selector:
+    app: tb-mqtt-transport
+  ports:
+    - name: tb-mqtt-transport
+      port: 1883
+      targetPort: 1883
+
+---
+# =============================================
+# Deployment cho Rule-engine (docker.io/thingsboard/tb-rule-engine:3.6.0)
+# =============================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tb-mqtt-transport
+  namespace: thingsboard
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: tb-mqtt-transport
+  template:
+    metadata:
+      labels:
+        app: tb-mqtt-transport
+    spec:
+      containers:
+        - name: tb-mqtt-transport
+          image: docker.io/thingsboard/tb-mqtt-transport:3.6.0
+          ports:
+            - containerPort: 1883
+          resources:
+            requests:
+              cpu: "2"
+              memory: "1Gi"
+            limits:
+              cpu: "4"
+              memory: "2Gi"
+          volumeMounts:
+            - name: tb-mqtt-transport-volume
+              mountPath: /config
+          env:
+            - name: ZOOKEEPER_ENABLED
+              value: "true"
+            - name: ZOOKEEPER_URL
+              value: "zookeeper:2181"
+            - name: MQTT_BIND_ADDRESS
+              value: "0.0.0.0"
+            - name: MQTT_BIND_PORT
+              value: "1883"
+            - name: MQTT_TIMEOUT
+              value: "10000"
+            - name: METRICS_ENABLED
+              value: "true"
+            - name: METRICS_ENDPOINTS_EXPOSE
+              value: "prometheus"
+            - name: WEB_APPLICATION_ENABLE
+              value: "true"
+            - name: WEB_APPLICATION_TYPE
+              value: "servlet"
+            - name: HTTP_BIND_PORT
+              value: "8081"
+            #QUEUE
+            - name: TB_QUEUE_TYPE
+              value: "kafka"
+            - name: TB_KAFKA_SERVERS
+              value: "kafka:9092"
+            - name: CACHE_TYPE
+              value: "redis"
+            #CACHE
+            - name: REDIS_HOST
+              value: "redis"
+            - name: REDIS_PORT
+              value: "6379"
+      volumes:
+        - name: tb-mqtt-transport-volume
+          configMap:
+            name: tb-mqtt-transport-conf
+            items:
+              - key: "logback.xml"
+                path: "logback.xml"
+              - key: "tb-mqtt-transport.conf"
+                path: "tb-mqtt-transport.conf"
