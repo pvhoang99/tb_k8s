@@ -48,14 +48,16 @@ spec:
 
           # Mount volume để lấy config HAProxy và chứng chỉ
           volumeMounts:
-            - name: config-volume
+            - name: ha-proxy-volume
               mountPath: /config
       # Khai báo volume (ở đây dùng hostPath cho ví dụ dev/test)
       volumes:
-        - name: config-volume
-          hostPath:
-            path: /home/pham_hoang/Desktop/tb_k3s/haproxy/config
-            type: DirectoryOrCreate
+        - name: ha-proxy-volume
+          configMap:
+            name: ha-proxy-configmap
+            items:
+              - key: "ha.conf"
+                path: "haproxy.cfg"
 
 ---
 # =====================================================================
