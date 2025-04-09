@@ -52,7 +52,7 @@ spec:
       volumes:
         - name: tb-vc-executor-volume
           configMap:
-            name: tb-vc-executor-conf
+            name: tb-vc-executor-configmap
             items:
               - key: "logback.xml"
                 path: "logback.xml"
