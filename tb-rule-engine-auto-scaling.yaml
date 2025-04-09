@@ -25,3 +25,16 @@ spec:
         target:
           type: Utilization
           averageUtilization: 70  # Nếu vượt 70% memory request sẽ scale up
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Pods         # Tăng theo số pod
+          value: 1           # Chỉ tăng 1 pod
+          periodSeconds: 30  # Mỗi 30s mới được tăng tiếp
+    scaleDown:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Pods         # Giảm theo số pod
+          value: 1           # Chỉ giảm 1 pod
+          periodSeconds: 60  # Mỗi 60s mới giảm tiếp
